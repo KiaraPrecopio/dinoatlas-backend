@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <module name="TreeWalker">
+
+        <!-- Regla: Nombres de clases deben comenzar con mayúscula -->
+        <module name="TypeName"/>
+
+        <!-- Regla: Nombres de variables y atributos en camelCase -->
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="ParameterName"/>
+
+        <!-- Regla: Nombres de métodos en camelCase -->
+        <module name="MethodName"/>
+
+        <!-- Regla: No usar imports sin usar -->
+        <module name="UnusedImports"/>
+
+        <!-- Regla: Espacios y sangrías -->
+        <module name="WhitespaceAround"/>
+        <module name="WhitespaceAfter"/>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="tabWidth" value="4"/>
+        </module>
+
+        <!-- Reglas de llaves obligatorias -->
+        <module name="NeedBraces"/>
+
+        <!-- Comentarios: Javadoc obligatorio en clases y métodos públicos -->
+        <module name="JavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="allowMissingParamTags" value="true"/>
+            <property name="allowMissingThrowsTags" value="true"/>
+        </module>
+        <module name="JavadocType"/>
+
+        <!-- Control de espacios entre operadores -->
+        <module name="OperatorWrap"/>
+
+        <!-- Bloques vacíos no permitidos -->
+        <module name="EmptyBlock"/>
+    </module>
+
+    <!-- Archivos deben terminar con una nueva línea -->
+    <module name="NewlineAtEndOfFile"/>
+</module>

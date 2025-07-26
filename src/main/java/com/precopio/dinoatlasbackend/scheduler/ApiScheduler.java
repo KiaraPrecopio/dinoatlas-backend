@@ -1,30 +1,26 @@
 package com.precopio.dinoatlasbackend.scheduler;
 
-import com.precopio.dinoatlasbackend.dto.TaxonListResponseDTO;
-import com.precopio.dinoatlasbackend.util.WebClientHelper;
+import com.precopio.dinoatlasbackend.service.IPaleobiologyApiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor(onConstructor_=@Autowired)
+@RequiredArgsConstructor
+@Slf4j
 public class ApiScheduler {
-    private final WebClientHelper webClientHelper;
+
+    private final IPaleobiologyApiService paleobiologyApiService;
 
     @Scheduled(cron = "0 0 0 1 * ?")
     public void updateDatabase() {
-        String url = "/taxa/list.json?name=Dinosauria&rel=all_children&rank=species&show=full";
+        log.info("Starting scheduled dinosaur database update...");
 
-        Mono<TaxonListResponseDTO> response = webClientHelper.getObjectAsync(url, TaxonListResponseDTO.class);
-
-        response.flatMap(taxonListResponse -> {
-            // Process the response here, e.g., save to database
-            // For now, just print the response
-            System.out.println("Received taxon list: " + taxonListResponse);
-            return Mono.empty(); // Return an empty Mono after processing
-        }).subscribe();
-        // Note: The subscribe() is necessary to trigger the asynchronous call.
+        paleobiologyApiService.syncAllDinosaurs()
+                .subscribe(
+                        success -> log.info("Scheduled database update completed successfully"),
+                        error -> log.error("Scheduled database update failed", error)
+                );
     }
 }
