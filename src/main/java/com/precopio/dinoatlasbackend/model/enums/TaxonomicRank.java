@@ -16,4 +16,13 @@ public enum TaxonomicRank {
     SUBSPECIES("subspecies");
 
     private final String value;
+
+    public static TaxonomicRank fromValue(String value) {
+        for (TaxonomicRank rank : TaxonomicRank.values()) {
+            if (rank.getValue().equalsIgnoreCase(value)) {
+                return rank;
+            }
+        }
+        throw new IllegalArgumentException("Unknown taxonomic rank: " + value);
+    }
 }

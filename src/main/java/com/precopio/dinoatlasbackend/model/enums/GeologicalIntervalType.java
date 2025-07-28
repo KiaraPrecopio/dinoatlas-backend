@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum TaxonType {
-    ICHNO("ichnotaxon"),
-    FORM("form taxon"),
-    ICHNO_FORM("ichnofossil form taxon"),
-    NON_SPECIFIED("non-specified");
+public enum GeologicalIntervalType {
+    EON("eon"),
+    ERA("era"),
+    PERIOD("period"),
+    EPOCH("epoch"),
+    AGE("age");
 
     private final String value;
 }
-

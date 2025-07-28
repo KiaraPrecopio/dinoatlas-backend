@@ -1,8 +1,6 @@
 package com.precopio.dinoatlasbackend.model.entity;
 
-import com.precopio.dinoatlasbackend.model.enums.Environment;
-import com.precopio.dinoatlasbackend.model.enums.Motility;
-import com.precopio.dinoatlasbackend.model.enums.TaxonomicRank;
+import com.precopio.dinoatlasbackend.model.enums.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,14 +10,17 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "taxon", indexes = {
-        @Index(name = "idx_taxon_oid", columnList = "originalId"),
         @Index(name = "idx_taxon_name", columnList = "name"),
+        @Index(name = "idx_taxon_common_name", columnList = "commonName"),
         @Index(name = "idx_taxon_rank", columnList = "rank"),
-        @Index(name = "idx_taxon_parent", columnList = "parentId")
+        @Index(name = "idx_taxon_is_extant", columnList = "isExtant"),
+        @Index(name = "idx_taxon_diet", columnList = "diet"),
+        @Index(name = "idx_taxon_class_name", columnList = "className"),
+        @Index(name = "idx_taxon_order_name", columnList = "orderName"),
+        @Index(name = "idx_taxon_clade_name", columnList = "cladeName")
 })
 @Data
 @Builder
@@ -37,6 +38,9 @@ public class Taxon {
     @Column(name = "name", nullable = false)
     private String name; // nam
 
+    @Column(name = "common_name")
+    private String commonName; // nm2
+
     @Enumerated(EnumType.STRING)
     @Column(name = "rank", nullable = false)
     private TaxonomicRank rank; // rnk
@@ -44,39 +48,15 @@ public class Taxon {
     @Column(name = "parent_id")
     private String parentId; // par
 
-    @Column(name = "reference_id")
-    private String referenceId; // rid
-
-    @Column(name = "flags")
-    private String flags; // flg
+    @Enumerated(EnumType.STRING)
+    @Column(name = "taxon_type", nullable = false)
+    private TaxonType taxonType;
 
     @Column(name = "is_extant")
     private Boolean isExtant; // ext (0 = extinct, 1 = extant)
 
-    @Column(name = "occurrence_count")
-    private Integer occurrenceCount; // noc
-
-    @Column(name = "size_value")
-    private Integer sizeValue; // siz
-
-    @Column(name = "has_exact_synonyms")
-    private Integer hasExactSynonyms; // exs
-
-    // Taxonomic hierarchy
-    @Column(name = "phylum")
-    private String phylum; // phl
-
-    @Column(name = "class_name")
-    private String className; // cll
-
-    @Column(name = "order_name")
-    private String orderName; // odl
-
-    @Column(name = "family")
-    private String family; // fml
-
-    @Column(name = "genus")
-    private String genus; // gnl
+    @Column(name = "fossils_occurrences")
+    private Integer fossilsOccurrences; // noc
 
     // Geological time intervals
     @ManyToOne(fetch = FetchType.LAZY)
@@ -87,41 +67,37 @@ public class Taxon {
     @JoinColumn(name = "latest_interval_id")
     private GeologicalInterval latestInterval;
 
-    @Column(name = "earliest_interval_name")
-    private String earliestIntervalName; // tei
+    // Taxonomic hierarchy
+    @Column(name = "phylum_name")
+    private String phylumName; // phl
 
-    @Column(name = "latest_interval_name")
-    private String latestIntervalName; // tli
+    @Column(name = "class_name")
+    private String className; // cll
 
-    // Ecological attributes
+    @Column(name = "order_name")
+    private String orderName; // odl
+
+    @Column(name = "family_name")
+    private String familyName; // fml
+
+    @Column(name = "genus_name")
+    private String genusName; // gnl
+
+    @Column(name = "clade_name")
+    private String cladeName; // jec
+
+    // Ecospace attributes
     @Enumerated(EnumType.STRING)
     @Column(name = "environment")
     private Environment environment; // jev
 
-    @Column(name = "ecological_category")
-    private String ecologicalCategory; // jec
+    @Enumerated(EnumType.STRING)
+    @Column(name = "life_habit")
+    private LifeHabit lifeHabit; // jlh
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "motility")
-    private Motility motility; // jmo
-
-    @Column(name = "composition")
-    private String composition; // jco
-
-    // Relationships
-    @OneToMany(mappedBy = "taxon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TaxonOccurrence> occurrences;
-
-    @OneToMany(mappedBy = "taxon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TaxonImage> images;
-
-    @ManyToMany
-    @JoinTable(
-            name = "taxon_reference",
-            joinColumns = @JoinColumn(name = "taxon_id"),
-            inverseJoinColumns = @JoinColumn(name = "reference_id")
-    )
-    private List<Reference> references;
+    @Column(name = "diet")
+    private DietType diet; // jdt
 
     // Audit fields
     @CreationTimestamp
@@ -134,11 +110,4 @@ public class Taxon {
 
     @Column(name = "last_synced_at")
     private LocalDateTime lastSyncedAt;
-
-    public String getFullTaxonomicName() {
-        if (genus != null && name != null) {
-            return genus + " " + name.replace(genus + " ", "");
-        }
-        return name;
-    }
 }

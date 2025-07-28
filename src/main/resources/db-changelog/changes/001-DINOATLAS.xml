@@ -2,6 +2,294 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
+    <changeSet id="001-DINOATLAS-001" author="precopio.kiara">
+        <comment>
+            Create geological_interval table to store geological intervals.
+        </comment>
+        <createTable tableName="geological_interval">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="interval_id" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="abbreviation" type="VARCHAR(50)"/>
+            <column name="interval_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="early_age" type="DOUBLE"/>
+            <column name="late_age" type="DOUBLE"/>
+            <column name="reference_id" type="VARCHAR(50)"/>
+            <column name="parent_id" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-002" author="precopio.kiara">
+        <comment>
+            Add foreign key constraint for parent_id in geological_interval table.
+        </comment>
+        <addForeignKeyConstraint
+                baseTableName="geological_interval"
+                baseColumnNames="parent_id"
+                constraintName="fk_geological_interval_parent"
+                referencedTableName="geological_interval"
+                referencedColumnNames="interval_id"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-003" author="precopio.kiara">
+        <comment>
+            Create taxon table to store taxonomic information.
+        </comment>
+        <createTable tableName="taxon">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="original_id" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="common_name" type="VARCHAR(255)"/>
+            <column name="rank" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="VARCHAR(50)"/>
+            <column name="taxon_type" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_extant" type="BOOLEAN"/>
+            <column name="fossils_occurrences" type="INTEGER"/>
+            <column name="earliest_interval_id" type="BIGINT"/>
+            <column name="latest_interval_id" type="BIGINT"/>
+            <column name="phylum_name" type="VARCHAR(255)"/>
+            <column name="class_name" type="VARCHAR(255)"/>
+            <column name="order_name" type="VARCHAR(255)"/>
+            <column name="family_name" type="VARCHAR(255)"/>
+            <column name="genus_name" type="VARCHAR(255)"/>
+            <column name="clade_name" type="VARCHAR(255)"/>
+            <column name="environment" type="VARCHAR(30)"/>
+            <column name="life_habit" type="VARCHAR(50)"/>
+            <column name="diet" type="VARCHAR(30)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_synced_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-004" author="precopio.kiara">
+        <comment>
+            Add foreign key constraints for taxon table.
+        </comment>
+        <addForeignKeyConstraint
+                baseTableName="taxon"
+                baseColumnNames="earliest_interval_id"
+                constraintName="fk_taxon_earliest_interval"
+                referencedTableName="geological_interval"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <addForeignKeyConstraint
+                baseTableName="taxon"
+                baseColumnNames="latest_interval_id"
+                constraintName="fk_taxon_latest_interval"
+                referencedTableName="geological_interval"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-005" author="precopio.kiara">
+        <comment>
+            Create indexes for taxon table to improve query performance.
+        </comment>
+        <createIndex indexName="idx_taxon_name" tableName="taxon">
+            <column name="name"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_common_name" tableName="taxon">
+            <column name="common_name"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_rank" tableName="taxon">
+            <column name="rank"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_is_extant" tableName="taxon">
+            <column name="is_extant"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_diet" tableName="taxon">
+            <column name="diet"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_class_name" tableName="taxon">
+            <column name="class_name"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_order_name" tableName="taxon">
+            <column name="order_name"/>
+        </createIndex>
+
+        <createIndex indexName="idx_taxon_clade_name" tableName="taxon">
+            <column name="clade_name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-006" author="precopio.kiara">
+        <comment>
+            Add enum constraints for interval_type column in geological_interval table.
+        </comment>
+        <modifyDataType tableName="geological_interval" columnName="interval_type"
+                        newDataType="ENUM(
+                        'EON',
+                        'ERA',
+                        'PERIOD',
+                        'EPOCH',
+                        'AGE'
+                        )"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-007" author="precopio.kiara">
+        <comment>
+            Add enum constraints for rank column in taxon table.
+        </comment>
+        <modifyDataType tableName="taxon" columnName="rank"
+                        newDataType="ENUM(
+                        'KINGDOM',
+                        'PHYLUM',
+                        'CLASS',
+                        'ORDER',
+                        'FAMILY',
+                        'GENUS',
+                        'SPECIES',
+                        'SUBSPECIES'
+                        )"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-008" author="precopio.kiara">
+        <comment>
+            Add enum constraints for taxon_type column in taxon table.
+        </comment>
+        <modifyDataType tableName="taxon" columnName="taxon_type"
+                        newDataType="ENUM(
+                        'NON_SPECIFIED',
+                        'ICHNO',
+                        'FORM',
+                        'ICHNO_FORM'
+                        )"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-009" author="precopio.kiara">
+        <comment>
+            Add enum constraints for environment column in taxon table.
+        </comment>
+        <modifyDataType tableName="taxon" columnName="environment"
+                        newDataType="ENUM(
+                        'LAGOONAL',
+                        'COASTAL',
+                        'INNER_SHELF',
+                        'OUTER_SHELF',
+                        'OCEANIC',
+                        'OLIGOTROPHIC',
+                        'MESOTROPHIC',
+                        'EUTROPHIC',
+                        'HYPERSALINE',
+                        'MARINE',
+                        'BRACKISH',
+                        'FRESHWATER',
+                        'TERRESTRIAL',
+                        'UNKNOWN'
+                        )"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-010" author="precopio.kiara">
+        <comment>
+            Add enum constraints for life_habit column in taxon table.
+        </comment>
+        <modifyDataType tableName="taxon" columnName="life_habit"
+                        newDataType="ENUM(
+                        'BORING',
+                        'INFAUNAL',
+                        'SHALLOW_INFAUNAL',
+                        'DEEP_INFAUNAL',
+                        'SEMI_INFAUNAL',
+                        'EPIFAUNAL',
+                        'LOW_LEVEL_EPIFAUNAL',
+                        'INTERMEDIATE_LEVEL_EPIFAUNAL',
+                        'UPPER_LEVEL_EPIFAUNAL',
+                        'NEKTOBENTHIC',
+                        'NEKTONIC',
+                        'PLANKTONIC',
+                        'FOSSORIAL',
+                        'SEMIFOSSORIAL',
+                        'GROUND_DWELLING',
+                        'CURSORIAL',
+                        'SALTATORIAL',
+                        'SCANSORIAL',
+                        'ARBOREAL',
+                        'GLIDING',
+                        'VOLANT',
+                        'AMPHIBIOUS',
+                        'HERBACEOUS',
+                        'ARBORESCENT',
+                        'AQUATIC',
+                        'COLONIAL',
+                        'GREGARIOUS',
+                        'SOLITARY',
+                        'CLONAL',
+                        'POLYMORPH',
+                        'DEPTH_SURFACE',
+                        'DEPTH_THERMOCLINE',
+                        'DEPTH_SUBTHERMOCLINE',
+                        'DEPTH_DEEP',
+                        'UNKNOWN'
+                        )"/>
+    </changeSet>
+
+    <changeSet id="001-DINOATLAS-011" author="precopio.kiara">
+        <comment>
+            Add enum constraints for diet column in taxon table.
+        </comment>
+        <modifyDataType tableName="taxon" columnName="diet"
+                        newDataType="ENUM(
+                        'CHEMOAUTOTROPH',
+                        'PHOTOAUTOTROPH',
+                        'C3_AUTOTROPH',
+                        'C4_AUTOTROPH',
+                        'CAM_AUTOTROPH',
+                        'CHEMOSYMBIOTIC',
+                        'PHOTOSYMBIOTIC',
+                        'HERBIVORE',
+                        'FRUGIVORE',
+                        'FOLIVORE',
+                        'BROWSER',
+                        'GRAZER',
+                        'GRANIVORE',
+                        'OMNIVORE',
+                        'INSECTIVORE',
+                        'CARNIVORE',
+                        'MICROCARNIVORE',
+                        'PISCIVORE',
+                        'DUROPHAGE',
+                        'PARASITE',
+                        'SUSPENSION_FEEDER',
+                        'OSMOTROPH',
+                        'DEPOSIT_FEEDER',
+                        'DETRITIVORE',
+                        'SAPROPHAGE',
+                        'COPROPHAGE',
+                        'UNKNOWN'
+                        )"/>
+    </changeSet>
 </databaseChangeLog>

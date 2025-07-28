@@ -1,16 +1,19 @@
 package com.precopio.dinoatlasbackend.model.entity;
 
+import com.precopio.dinoatlasbackend.model.enums.GeologicalIntervalType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "geological_interval")
+@Table(name = "geological_interval", indexes = {
+        @Index(name = "idx_geological_interval_name", columnList = "name"),
+        @Index(name = "idx_geological_interval_interval_type", columnList = "interval_type")
+})
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,29 +24,32 @@ public class GeologicalInterval {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "interval_id", unique = true, nullable = false)
+    private String intervalId;
+
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "abbreviation")
     private String abbreviation;
 
-    @Column(name = "early_age", precision = 10, scale = 2)
-    private BigDecimal earlyAge; // En millones de años
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interval_type", nullable = false)
+    private GeologicalIntervalType intervalType; // eon, era, period, epoch, age
 
-    @Column(name = "late_age", precision = 10, scale = 2)
-    private BigDecimal lateAge; // En millones de años
+    @Column(name = "early_age")
+    private Double earlyAge;
 
-    @Column(name = "level") // Era, Period, Epoch, Age
-    private String level;
+    @Column(name = "late_age")
+    private Double lateAge;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_interval_id")
-    private GeologicalInterval parentInterval;
+    @Column(name = "reference_id")
+    private String referenceId;
 
-    @OneToMany(mappedBy = "parentInterval", cascade = CascadeType.ALL)
-    private List<GeologicalInterval> subIntervals;
+    @ManyToOne
+    @JoinColumn(name = "parent_id", referencedColumnName = "interval_id")
+    private GeologicalInterval parent;
 
-    // Color para visualización
-    @Column(name = "color_hex")
-    private String colorHex;
+    @OneToMany(mappedBy = "parent")
+    private List<GeologicalInterval> children;
 }
